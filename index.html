@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0f0f0f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<title>Mack Lesson Clips</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400,0..1,0&display=block">
+<style>
+/* Layout: video-site shell. Sticky top bar + chip rail; home = thumbnail grid; watch = player, actions, description, notes,
+   then the next clips (below on phones, right column on wide screens). One accent (marks, progress), neutral greys. */
+:root{
+  --bg:#ffffff; --fg:#0f0f0f; --mut:#606060; --soft:rgba(0,0,0,.05); --soft2:rgba(0,0,0,.1); --line:rgba(0,0,0,.1);
+  --accent:#e5132d; --badge:rgba(0,0,0,.78); --focus:#065fd4;
+  --f:"Roboto","PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  --bar:56px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f0f0f; --fg:#f1f1f1; --mut:#aaaaaa; --soft:rgba(255,255,255,.1); --soft2:rgba(255,255,255,.2); --line:rgba(255,255,255,.18);
+  --accent:#ff4e45; --badge:rgba(0,0,0,.78); --focus:#3ea6ff; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f0f0f; --fg:#f1f1f1; --mut:#aaaaaa; --soft:rgba(255,255,255,.1); --soft2:rgba(255,255,255,.2); --line:rgba(255,255,255,.18);
+  --accent:#ff4e45; --badge:rgba(0,0,0,.78); --focus:#3ea6ff; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{background:var(--bg);color:var(--fg);font:400 14px/1.45 var(--f);-webkit-tap-highlight-color:transparent}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:8px}
+.ms{font-family:"Material Symbols Outlined";font-weight:400;font-style:normal;font-size:24px;line-height:1;display:inline-block;
+  font-variation-settings:"FILL" 0,"opsz" 24;-webkit-font-feature-settings:"liga";font-feature-settings:"liga";user-select:none;flex:none}
+.fill{font-variation-settings:"FILL" 1,"opsz" 24}
+
+/* top bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;height:var(--bar);background:var(--bg);display:flex;align-items:center;gap:4px;padding-inline:8px 12px}
+.ib{width:40px;height:40px;border-radius:50%;display:grid;place-items:center}
+.ib:hover{background:var(--soft)}
+.logo{display:flex;align-items:center;gap:6px;padding:6px 8px;font-weight:500;font-size:18px;letter-spacing:-.2px;white-space:nowrap}
+.logo .ms{color:var(--accent);font-size:28px}
+.sp{flex:1}
+.search{flex:1;max-width:560px;display:flex;align-items:center;height:40px;border:1px solid var(--line);border-radius:20px;padding-inline:16px 6px;background:var(--bg)}
+.search:focus-within{border-color:var(--focus)}
+.search input{flex:1;min-width:0;border:0;background:none;color:var(--fg);font:inherit;font-size:16px;outline:none}
+.search input::-webkit-search-cancel-button{display:none}
+.search .ib{width:32px;height:32px}
+body.searching .logo, body.searching #sbtn{display:none}
+@media (min-width:720px){#sbtn{display:none}.search{display:flex!important;margin-inline:auto}.bar{padding-inline:16px 24px}}
+
+/* chip rail */
+.chips{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--bar));z-index:19;background:var(--bg);display:flex;gap:12px;overflow-x:auto;
+  scrollbar-width:none;padding:4px 16px 12px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;height:32px;padding-inline:12px;border-radius:8px;background:var(--soft);font-weight:500;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.chip:hover{background:var(--soft2)}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.chip .ms{font-size:18px}
+.chip small{font-weight:400;opacity:.7;font-size:12px}
+
+/* cards */
+main{padding-inline:16px;padding-block:4px 48px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:28px 16px;max-width:2200px;margin-inline:auto}
+.card{display:flex;flex-direction:column;gap:10px;min-width:0}
+.th{position:relative;aspect-ratio:16/9;max-width:100%;border-radius:12px;overflow:hidden;background:var(--soft)}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.dur{position:absolute;right:6px;bottom:6px;background:var(--badge);color:#fff;font-size:12px;font-weight:500;padding:1px 4px;border-radius:4px;font-variant-numeric:tabular-nums}
+.mark{position:absolute;left:6px;top:6px;background:var(--badge);color:var(--accent);border-radius:6px;width:26px;height:26px;display:grid;place-items:center}
+.mark .ms{font-size:18px}
+.prog{position:absolute;left:0;bottom:0;height:4px;background:var(--accent)}
+.th .prog-track{position:absolute;inset:auto 0 0 0;height:4px;background:rgba(160,160,160,.55)}
+.ct{min-width:0;display:flex;flex-direction:column;gap:3px;padding-right:12px}
+.ct h3{margin:0;font-size:16px;font-weight:500;line-height:22px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ct p{margin:0;color:var(--mut);font-size:13px;line-height:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;gap:4px;align-items:center}
+.ct p .ms{font-size:16px}
+.card:hover h3{text-decoration:none}
+.empty{padding:48px 0;color:var(--mut);text-align:center;display:grid;gap:12px;justify-items:center}
+.empty .ms{font-size:48px}
+
+/* watch */
+.watch{display:grid;gap:12px 24px;max-width:1760px;margin-inline:auto}
+.watch{grid-template-areas:"p" "i" "n"}
+@media (min-width:1000px){.watch{grid-template-columns:minmax(0,1fr) 402px;grid-template-areas:"p n" "i n";grid-template-rows:auto 1fr;row-gap:12px}}
+.player{grid-area:p;position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--bar));z-index:10;background:var(--bg);padding-bottom:8px}
+@media (min-width:1000px){.player{position:static;padding-bottom:0}}
+.frame{position:relative;width:100%;aspect-ratio:16/9;max-width:100%;background:#000;border-radius:12px;overflow:hidden}
+.frame iframe,.frame #yt{position:absolute;inset:0;width:100%;height:100%;border:0}
+.menu{position:absolute;right:12px;top:calc(var(--bar) - 4px);z-index:30;min-width:240px;max-width:calc(100vw - 32px);background:var(--bg);border:1px solid var(--line);
+  border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.18);padding:8px 0;display:flex;flex-direction:column}
+.menu .mh{margin:4px 16px 8px;color:var(--mut);font-size:13px;line-height:1.4}
+.menu button{display:flex;align-items:center;gap:14px;padding:10px 16px;text-align:left;font-size:14px}
+.menu button:hover{background:var(--soft)}
+.bar{position:sticky}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;background:var(--fg);color:var(--bg);
+  padding:10px 16px;border-radius:8px;font-size:14px;max-width:calc(100vw - 32px)}
+.info{grid-area:i;display:flex;flex-direction:column;gap:12px;min-width:0}
+.info h1{margin:4px 0 0;font-size:20px;line-height:28px;font-weight:500;text-wrap:balance}
+.sub{color:var(--mut);font-size:14px;display:flex;flex-wrap:wrap;gap:4px 12px}
+.acts{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.acts::-webkit-scrollbar{display:none}
+.pill{flex:none;height:36px;padding-inline:12px 16px;border-radius:18px;background:var(--soft);display:flex;align-items:center;gap:6px;font-weight:500;white-space:nowrap}
+.pill:hover{background:var(--soft2)}
+.pill .ms{font-size:22px}
+.pill.on{background:var(--fg);color:var(--bg)}
+.pill.on .ms{font-variation-settings:"FILL" 1,"opsz" 24;color:var(--accent)}
+.pill[disabled]{opacity:.4;cursor:default}
+.desc{background:var(--soft);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;font-size:14px;min-width:0}
+.desc b{font-weight:500}
+.desc p{margin:0;overflow-wrap:anywhere}
+.desc .muted{color:var(--mut)}
+.desc a{color:var(--focus);font-weight:500}
+.badge{display:inline-flex;align-items:center;gap:4px;background:var(--fg);color:var(--bg);border-radius:4px;padding:0 6px;font-size:12px;font-weight:500}
+.notes{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.nh{display:flex;align-items:baseline;gap:12px}
+.nh h2{margin:0;font-size:20px;font-weight:500}
+.ns{color:var(--mut);font-size:13px}
+.note{width:100%;min-height:120px;resize:vertical;font:inherit;font-size:16px;line-height:1.5;color:var(--fg);background:transparent;border:0;
+  border-bottom:1px solid var(--line);padding:6px 0;outline:none}
+.note:focus{border-bottom:2px solid var(--fg);padding-bottom:5px}
+.note[readonly]{border-bottom-style:dashed}
+.nrow{display:flex;gap:8px;flex-wrap:wrap}
+.pill.sm{height:32px;font-size:13px;padding-inline:10px 12px}
+.pill.sm .ms{font-size:18px}
+.next{grid-area:n;display:flex;flex-direction:column;gap:16px;min-width:0}
+.next h2{margin:8px 0 0;font-size:16px;font-weight:500}
+@media (min-width:1000px){
+  .next{gap:8px}
+  .next .card{flex-direction:row;gap:8px}
+  .next .th{width:168px;flex:none;border-radius:8px}
+  .next .ct h3{font-size:14px;line-height:20px}
+  .next .ct p{font-size:12px}
+  .next .dur{font-size:11px}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="bar" id="bar">
+  <button class="ib" id="back" type="button" aria-label="Back" hidden><span class="ms">arrow_back</span></button>
+  <a class="logo" href="#" id="logo"><span class="ms fill">candlestick_chart</span>Mack Lessons</a>
+  <label class="search" id="sbox" hidden><input id="q" type="search" placeholder="Search clips and notes" autocomplete="off" enterkeyhint="search">
+    <button class="ib" id="qx" type="button" aria-label="Clear search" hidden><span class="ms">close</span></button><span class="ms" aria-hidden="true" style="color:var(--mut);padding-inline:6px">search</span></label>
+  <span class="sp"></span>
+  <button class="ib" id="sbtn" type="button" aria-label="Search"><span class="ms">search</span></button>
+  <button class="ib" id="menub" type="button" aria-label="Notes backup" aria-haspopup="menu" aria-expanded="false"><span class="ms">more_vert</span></button>
+  <div class="menu" id="menu" role="menu" hidden>
+    <p class="mh">Notes are saved in this browser. Move them to another device with a backup file.</p>
+    <button type="button" role="menuitem" id="exp"><span class="ms">download</span>Export notes</button>
+    <button type="button" role="menuitem" id="imp"><span class="ms">upload</span>Import notes</button>
+    <input type="file" id="impf" accept="application/json,.json" hidden>
+  </div>
+</header>
+<nav class="chips" id="chips" aria-label="Topics"></nav>
+<main id="home"><div class="grid" id="grid"></div></main>
+<main id="watchv" hidden>
+  <div class="watch">
+    <div class="player"><div class="frame"><div id="yt"></div></div></div>
+    <div class="info">
+      <h1 id="wt"></h1>
+      <div class="sub" id="wm"></div>
+      <div class="acts">
+        <button class="pill" id="star" type="button" aria-pressed="false"><span class="ms">star</span><span id="startx">Star</span></button>
+        <button class="pill" id="full" type="button" aria-pressed="false"><span class="ms" id="fullic">smart_display</span><span id="fulltx">Full video</span></button>
+        <button class="pill" id="prev" type="button"><span class="ms">skip_previous</span>Previous</button>
+        <button class="pill" id="nextb" type="button"><span class="ms">skip_next</span>Next</button>
+      </div>
+      <div class="desc" id="wd"></div>
+      <section class="notes" aria-labelledby="nht">
+        <div class="nh"><h2 id="nht">Notes</h2><span class="ns" id="ns" aria-live="polite"></span></div>
+        <textarea class="note" id="note" placeholder="Write down what matters in this clip…"></textarea>
+        <div class="nrow"><button class="pill sm" id="ts" type="button"><span class="ms">more_time</span><span id="tstx">Add timestamp 0:00</span></button></div>
+      </section>
+    </div>
+    <aside class="next" id="next" aria-label="Up next"></aside>
+  </div>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = s => { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") };
+const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } },
+                set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true } catch { return false } } };
+
+let D = { groups: {}, items: [] }, byId = {}, N = store.get("mk-notes", {});
+let chip = store.get("mk-chip", ""), q = "", cur = null, mode = "clip";
+const prog = store.get("mk-prog", {});
+
+fetch("clips.json").then(r => r.json()).then(d => {
+  D = d; d.items.forEach(x => byId[x.id] = x);
+  if (chip && !["star", "note"].includes(chip) && !d.items.some(x => x.g === chip)) chip = "";
+  route();
+}).catch(() => { $("#grid").innerHTML = `<div class="empty"><span class="ms">cloud_off</span>The clip list didn't load. Refresh the page to try again.</div>` });
+
+function toast(t) { const el = $("#toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 2600) }
+
+/* ---------- notes & marks (this browser) ---------- */
+function edit(id, patch) {
+  N[id] = { ...N[id], ...patch, updated: new Date().toISOString() };
+  if (!N[id].star && !(N[id].note || "").trim()) delete N[id];
+  const ok = store.set("mk-notes", N);
+  if (cur?.id === id) $("#ns").textContent = ok ? "Saved on this device" : "Not saved: this browser blocks storage (private mode?)";
+}
+$("#exp").onclick = () => {
+  const n = Object.keys(N).length;
+  const blob = new Blob([JSON.stringify({ app: "mack-lessons", exported: new Date().toISOString(), notes: N }, null, 1)], { type: "application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `mack-notes-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  closeMenu(); toast(`Exported ${n} note${n === 1 ? "" : "s"}`);
+};
+$("#imp").onclick = () => $("#impf").click();
+$("#impf").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try {
+    const j = JSON.parse(await f.text()), inc = j.notes || j; let n = 0;
+    for (const [id, v] of Object.entries(inc)) {
+      if (!byId[id] || typeof v !== "object") continue;
+      if (!N[id] || (v.updated || "") > (N[id].updated || "")) { N[id] = v; n++ }
+    }
+    store.set("mk-notes", N); closeMenu(); refresh(); toast(`Imported ${n} note${n === 1 ? "" : "s"}`);
+  } catch { closeMenu(); toast("That file isn't a notes backup from this site") }
+};
+const menu = $("#menu"), menub = $("#menub");
+function closeMenu() { menu.hidden = true; menub.setAttribute("aria-expanded", "false") }
+menub.onclick = e => { e.stopPropagation(); menu.hidden = !menu.hidden; menub.setAttribute("aria-expanded", String(!menu.hidden)) };
+document.addEventListener("click", e => { if (!menu.hidden && !menu.contains(e.target)) closeMenu() });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu() });
+
+/* ---------- home ---------- */
+function list() {
+  const s = q.trim().toLowerCase();
+  return D.items.filter(x => {
+    if (chip === "star" && !N[x.id]?.star) return false;
+    if (chip === "note" && !(N[x.id]?.note || "").trim()) return false;
+    if (chip && chip !== "star" && chip !== "note" && x.g !== chip) return false;
+    if (!s) return true;
+    return [x.h, x.desc, x.src, x.date, D.groups[x.g], N[x.id]?.note].join(" ").toLowerCase().includes(s);
+  });
+}
+function card(x) {
+  const p = prog[x.id], w = p ? Math.min(100, p / x.dur * 100) : 0, n = N[x.id] || {};
+  const meta = [D.groups[x.g], x.date].filter(Boolean).map(esc).join(" · ");
+  return `<a class="card" href="#w${x.id}"><div class="th"><img loading="lazy" decoding="async" src="${esc(x.t)}" alt="">
+    ${w > 2 ? `<span class="prog-track"></span><span class="prog" style="width:${w.toFixed(1)}%"></span>` : ""}
+    ${n.star ? `<span class="mark" title="Starred"><span class="ms fill">star</span></span>` : ""}<span class="dur">${fmt(x.dur)}</span></div>
+    <div class="ct"><h3>${esc(x.h)}</h3><p>${meta}</p>${x.src || (n.note || "").trim() ? `<p>${(n.note || "").trim() ? `<span class="ms" title="Has notes">edit_note</span>` : ""}${esc(x.src)}</p>` : ""}</div></a>`;
+}
+function drawChips() {
+  const used = [...new Set(D.items.map(x => x.g))];
+  const nStar = D.items.filter(x => N[x.id]?.star).length, nNote = D.items.filter(x => (N[x.id]?.note || "").trim()).length;
+  const c = [["", "All"], ["star", `<span class="ms">star</span>Starred <small>${nStar}</small>`], ["note", `<span class="ms">edit_note</span>With notes <small>${nNote}</small>`],
+    ...used.map(g => [g, `${esc(D.groups[g] || g)} <small>${D.items.filter(x => x.g === g).length}</small>`])];
+  $("#chips").innerHTML = c.map(([k, l]) => `<button class="chip" type="button" data-c="${esc(k)}" aria-pressed="${chip === k}">${l}</button>`).join("");
+}
+function drawHome() {
+  drawChips();
+  const L = list();
+  $("#grid").innerHTML = L.length ? L.map(card).join("") : chip === "star" && !q
+    ? `<div class="empty"><span class="ms">star</span>No starred clips yet. Open a clip and tap Star to keep it here.</div>`
+    : `<div class="empty"><span class="ms">search_off</span>No clips match your search</div>`;
+}
+$("#chips").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  chip = b.dataset.c; store.set("mk-chip", chip); drawHome(); scrollTo({ top: 0 });
+});
+
+/* ---------- YouTube player ---------- */
+let player = null, ytReady = false, waiting = [];
+window.onYouTubeIframeAPIReady = () => { ytReady = true; const w = waiting; waiting = []; w.forEach(f => withPlayer(f)) };
+function withPlayer(fn) {
+  if (player?.cueVideoById) return fn();
+  if (!ytReady) { waiting.push(fn); return }
+  if (player) { waiting.push(fn); return }
+  player = new YT.Player("yt", { host: "https://www.youtube-nocookie.com", width: "100%", height: "100%",
+    playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
+    events: { onReady: () => { const w = waiting; waiting = []; fn(); w.forEach(f => f()) } } });
+}
+const t0 = () => player?.getCurrentTime ? player.getCurrentTime() : 0;
+const clipT = () => cur ? Math.min(cur.dur, Math.max(0, t0() - cur.at)) : 0;
+function playClip(x, from, autoplay) {
+  withPlayer(() => player[autoplay ? "loadVideoById" : "cueVideoById"]({ videoId: x.ep, startSeconds: x.at + from, endSeconds: x.at + x.dur }));
+}
+setInterval(() => {
+  if (!cur || !player?.getPlayerState) return;
+  $("#tstx").textContent = "Add timestamp " + fmt(mode === "full" ? t0() : clipT());
+  if (mode === "clip" && player.getPlayerState() === 1 && Math.round(t0()) % 5 === 0) saveProg();
+}, 1000);
+function saveProg() {
+  if (!cur || mode !== "clip" || !player?.getPlayerState) return;
+  const st = player.getPlayerState(), t = st === 0 ? cur.dur : clipT();
+  if (t > 0) { prog[cur.id] = t; store.set("mk-prog", prog) }
+}
+document.addEventListener("visibilitychange", () => { if (document.hidden) saveProg() });
+
+/* ---------- watch ---------- */
+const siblings = x => D.items.filter(y => y.g === x.g);
+function drawWatch(x) {
+  const n = N[x.id] || {}, full = mode === "full";
+  $("#wt").textContent = x.h;
+  $("#wm").innerHTML = full
+    ? [`<span class="badge"><span class="ms" style="font-size:16px">smart_display</span>Full episode</span>`, esc(x.date)].filter(Boolean).map(t => `<span>${t}</span>`).join("")
+    : [D.groups[x.g], x.date, fmt(x.dur)].filter(Boolean).map(t => `<span>${esc(t)}</span>`).join("");
+  const star = $("#star");
+  star.classList.toggle("on", !!n.star); star.setAttribute("aria-pressed", String(!!n.star)); $("#startx").textContent = n.star ? "Starred" : "Star";
+  const fb = $("#full"); fb.hidden = !x.ep; fb.classList.toggle("on", full); fb.setAttribute("aria-pressed", String(full));
+  $("#fullic").textContent = full ? "content_cut" : "smart_display"; $("#fulltx").textContent = full ? "Back to clip" : "Full video";
+  const sib = siblings(x), i = sib.indexOf(x);
+  $("#prev").disabled = i <= 0; $("#nextb").disabled = i >= sib.length - 1;
+  const yt = x.ep ? `https://www.youtube.com/watch?v=${x.ep}&t=${x.at}s` : "";
+  $("#wd").innerHTML = [
+    x.desc ? `<p>${esc(x.desc)}</p>` : "",
+    x.src ? `<p><b>From</b> ${esc(x.src)}${x.rng ? `<span class="muted">, at ${esc(x.rng)}</span>` : ""}</p>` : x.rng ? `<p class="muted">At ${esc(x.rng)} in the full video</p>` : "",
+    `<p class="muted">${esc(D.groups[x.g] || x.g)}: clip ${i + 1} of ${sib.length}</p>`,
+    yt ? `<p><a href="${esc(yt)}" target="_blank" rel="noopener">Open on YouTube</a></p>` : ""].join("");
+  const ta = $("#note");
+  if (document.activeElement !== ta) ta.value = n.note || "";
+  $("#ns").textContent = n.updated ? "Saved on this device" : "";
+  const rest = sib.filter(y => y !== x), others = D.items.filter(y => y.g !== x.g);
+  const nx = [...rest.slice(i), ...rest.slice(0, i), ...others].slice(0, 24);
+  $("#next").innerHTML = `<h2>Up next</h2>` + nx.map(card).join("");
+}
+function openClip(x) {
+  if (cur !== x) {
+    saveProg(); cur = x; mode = "clip";
+    const p = prog[x.id], from = p && p > 5 && p < x.dur - 5 ? p : 0;
+    if (x.ep) playClip(x, from, false);
+    scrollTo({ top: 0 });
+  }
+  drawWatch(x);
+}
+$("#full").onclick = () => {
+  if (!cur?.ep) return;
+  if (mode === "full") { const back = Math.min(cur.dur - 1, Math.max(0, t0() - cur.at)); mode = "clip"; playClip(cur, back, true) }
+  else { saveProg(); const from = cur.at + clipT(); mode = "full"; withPlayer(() => player.loadVideoById({ videoId: cur.ep, startSeconds: from })) }
+  drawWatch(cur);
+};
+$("#star").onclick = () => { if (cur) { edit(cur.id, { star: !N[cur.id]?.star }); drawWatch(cur) } };
+$("#note").addEventListener("input", e => { if (cur) edit(cur.id, { note: e.target.value }) });
+$("#ts").onclick = () => {
+  const ta = $("#note"), t = mode === "full" ? `[full ${fmt(t0())}] ` : `[${fmt(clipT())}] `, a = ta.selectionStart ?? ta.value.length;
+  const pre = ta.value.slice(0, a), sep = pre && !pre.endsWith("\n") ? "\n" : "";
+  ta.value = pre + sep + t + ta.value.slice(ta.selectionEnd ?? a); ta.focus();
+  const pos = (pre + sep + t).length; ta.setSelectionRange(pos, pos); edit(cur.id, { note: ta.value });
+};
+const step = d => { const s = siblings(cur), i = s.indexOf(cur); if (s[i + d]) location.hash = "w" + s[i + d].id };
+$("#prev").onclick = () => step(-1); $("#nextb").onclick = () => step(1);
+
+/* ---------- search ---------- */
+const sbox = $("#sbox"), qi = $("#q");
+$("#sbtn").onclick = () => { document.body.classList.add("searching"); sbox.hidden = false; $("#back").hidden = false; qi.focus() };
+qi.addEventListener("input", () => { q = qi.value; $("#qx").hidden = !q; if (cur) location.hash = ""; else drawHome() });
+qi.addEventListener("keydown", e => { if (e.key === "Enter") qi.blur() });
+$("#qx").onclick = () => { qi.value = q = ""; $("#qx").hidden = true; drawHome(); qi.focus() };
+$("#back").onclick = () => {
+  if (document.body.classList.contains("searching") && !cur) { document.body.classList.remove("searching"); sbox.hidden = true; qi.value = q = ""; $("#back").hidden = true; drawHome(); return }
+  if (history.length > 1 && cur) history.back(); else location.hash = "";
+};
+
+/* ---------- routing ---------- */
+function route() {
+  const m = location.hash.match(/^#w([0-9a-f]{10})$/), x = m && byId[m[1]];
+  $("#home").hidden = !!x; $("#watchv").hidden = !x; $("#chips").hidden = !!x;
+  $("#back").hidden = !x && !document.body.classList.contains("searching");
+  if (x) openClip(x);
+  else { if (cur) { saveProg(); player?.stopVideo?.(); cur = null } drawHome() }
+}
+function refresh() { if (cur) drawWatch(cur); else if (D.items.length) drawHome() }
+addEventListener("hashchange", route);
+</script>
+<script src="https://www.youtube.com/iframe_api" async></script>
+</body>
+</html>
