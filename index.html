@@ -7,6 +7,10 @@
 <meta name="theme-color" content="#0f0f0f" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <title>Mack Lesson Clips</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400,0..1,0&display=block">
 <style>
@@ -41,7 +45,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;paddin
 .ib{width:40px;height:40px;border-radius:50%;display:grid;place-items:center}
 .ib:hover{background:var(--soft)}
 .logo{display:flex;align-items:center;gap:6px;padding:6px 8px;font-weight:500;font-size:18px;letter-spacing:-.2px;white-space:nowrap}
-.logo .ms{color:var(--accent);font-size:28px}
+.logo .logomark{width:28px;height:28px;flex:none;display:block}
 .sp{flex:1}
 .search{flex:1;max-width:560px;display:flex;align-items:center;height:40px;border:1px solid var(--line);border-radius:20px;padding-inline:16px 6px;background:var(--bg)}
 .search:focus-within{border-color:var(--focus)}
@@ -140,7 +144,7 @@ main{padding-inline:16px;padding-block:4px 48px}
 <body>
 <header class="bar" id="bar">
   <button class="ib" id="back" type="button" aria-label="Back" hidden><span class="ms">arrow_back</span></button>
-  <a class="logo" href="#" id="logo"><span class="ms fill">candlestick_chart</span>Mack Lessons</a>
+  <a class="logo" href="#" id="logo" aria-label="Mack Lessons home"><svg class="logomark" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="var(--accent)"/><path d="M13 46 23 19l9 16 9-16 10 27" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>Mack Lessons</a>
   <label class="search" id="sbox" hidden><input id="q" type="search" placeholder="Search clips and notes" autocomplete="off" enterkeyhint="search">
     <button class="ib" id="qx" type="button" aria-label="Clear search" hidden><span class="ms">close</span></button><span class="ms" aria-hidden="true" style="color:var(--mut);padding-inline:6px">search</span></label>
   <span class="sp"></span>
@@ -263,6 +267,11 @@ function drawHome() {
     ? `<div class="empty"><span class="ms">star</span>No starred clips yet. Open a clip and tap Star to keep it here.</div>`
     : `<div class="empty"><span class="ms">search_off</span>No clips match your search</div>`;
 }
+/* mouse wheel scrolls the chip rail and the action row sideways */
+document.querySelectorAll(".chips,.acts").forEach(el => el.addEventListener("wheel", e => {
+  if (Math.abs(e.deltaY) <= Math.abs(e.deltaX) || el.scrollWidth <= el.clientWidth) return;
+  e.preventDefault(); el.scrollLeft += e.deltaY;
+}, { passive: false }));
 $("#chips").addEventListener("click", e => {
   const b = e.target.closest(".chip"); if (!b) return;
   chip = b.dataset.c; store.set("mk-chip", chip); drawHome(); scrollTo({ top: 0 });
